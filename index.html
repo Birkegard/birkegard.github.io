@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Christoffer Birkegård – Javautvecklare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0f11;
+      --surface: #16181c;
+      --surface2: #1e2127;
+      --border: #2a2d35;
+      --accent: #e8c547;
+      --accent2: #4e9eff;
+      --text: #e8e9eb;
+      --muted: #7a7f8a;
+      --tag-bg: #1e2127;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HERO ── */
+    header {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 4rem;
+      padding: 6rem 0 4rem;
+      position: relative;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: -10%; right: -10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .hero-text { order: 1; }
+
+    .hero-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s forwards;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      opacity: 0;
+      animation: fadeUp 0.7s 0.2s forwards;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-role {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.35s forwards;
+    }
+
+    .hero-bio {
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: #b0b4be;
+      max-width: 44ch;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.45s forwards;
+    }
+
+    .hero-contacts {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.55s forwards;
+    }
+
+    .contact-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .contact-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .contact-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); }
+
+    /* PHOTO */
+    .hero-photo {
+      order: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      animation: fadeIn 1s 0.3s forwards;
+    }
+
+    .photo-frame {
+      position: relative;
+      width: 280px;
+      height: 340px;
+    }
+
+    .photo-frame::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transform: rotate(3deg);
+    }
+
+    .photo-frame::after {
+      content: 'CB';
+      position: absolute;
+      bottom: -24px;
+      right: -12px;
+      font-family: 'DM Serif Display', serif;
+      font-size: 5rem;
+      color: var(--surface2);
+      letter-spacing: -0.05em;
+      z-index: -1;
+    }
+
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      background: var(--surface2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 5rem;
+      color: var(--border);
+      overflow: hidden;
+    }
+
+    .photo-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section:last-child { border-bottom: none; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    /* ── SKILLS GRID ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .skill-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .skill-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+
+    .skill-card:hover::before { transform: scaleX(1); }
+
+    .skill-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .skill-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .skill-level {
+      margin-top: 0.5rem;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .skill-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      animation: growBar 1s ease-out forwards;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+
+    @keyframes growBar {
+      to { transform: scaleX(1); }
+    }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .timeline-item {
+      padding: 0 0 3rem 2.5rem;
+      position: relative;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: slideIn 0.5s forwards;
+    }
+
+    .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+
+    .timeline-dot {
+      position: absolute;
+      left: -4px; top: 6px;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .timeline-period {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent2);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    .timeline-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .timeline-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .timeline-list li {
+      font-size: 0.9rem;
+      color: #9ea3ae;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+
+    .timeline-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.75rem;
+    }
+
+    /* ── EDUCATION ── */
+    .edu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .edu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      transition: border-color 0.2s;
+    }
+
+    .edu-card:hover { border-color: var(--accent2); }
+
+    .edu-period {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent2);
+      margin-bottom: 0.5rem;
+    }
+
+    .edu-school {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .edu-program {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .edu-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.2rem 0.6rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+
+    /* ── LEADERSHIP ── */
+    .leadership-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .lead-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+
+    .lead-card:hover { border-color: var(--accent); }
+
+    .lead-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+
+    .lead-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+
+    .lead-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* ── GITHUB ── */
+    .github-section {
+      text-align: center;
+    }
+
+    .github-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 1rem 2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .github-cta:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .github-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .repo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: left;
+      transition: border-color 0.2s, transform 0.2s;
+      text-decoration: none;
+    }
+
+    .repo-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+
+    .repo-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent2);
+      margin-bottom: 0.5rem;
+    }
+
+    .repo-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 3rem 0;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    footer span { color: var(--accent); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      header { grid-template-columns: 1fr; min-height: auto; padding: 4rem 0 3rem; }
+      .hero-photo { order: -1; }
+      .photo-frame { width: 160px; height: 200px; }
+      .edu-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 2.8rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <header>
+    <div class="hero-text">
+      <p class="hero-label">// Portfolio & CV</p>
+      <h1>Christoffer<br /><em>Birkegård</em></h1>
+      <p class="hero-role">Blivande Javautvecklare · YH-student @ IT-Högskolan</p>
+      <p class="hero-bio">
+        Javautvecklare under utbildning med gedigen bakgrund inom systemadministration, 
+        verksamhetsutveckling och ledarskap. Kombinerar teknisk kompetens med stark 
+        problemlösningsförmåga och vana att arbeta i team och projekt.
+      </p>
+      <div class="hero-contacts">
+        <a href="mailto:christoffer.birkegard@iths.se" class="contact-pill"><span class="dot"></span>christoffer.birkegard@iths.se</a>
+        <a href="https://github.com/Birkegard" target="_blank" class="contact-pill"><span class="dot"></span>github.com/Birkegard</a>
+        <span class="contact-pill"><span class="dot"></span>Stockholm</span>
+      </div>
+    </div>
+    <div class="hero-photo">
+      <div class="photo-frame">
+        <div class="photo-placeholder">👨‍💻</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── KOMPETENSER ── -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Kompetenser</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">☕</div>
+        <div class="skill-name">Java & OOP</div>
+        <div class="skill-level"><div class="skill-fill" style="width:80%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🌱</div>
+        <div class="skill-name">Spring Boot & REST API</div>
+        <div class="skill-level"><div class="skill-fill" style="width:70%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🗄️</div>
+        <div class="skill-name">Databaser (SQL & NoSQL)</div>
+        <div class="skill-level"><div class="skill-fill" style="width:65%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">☁️</div>
+        <div class="skill-name">AWS (grundläggande)</div>
+        <div class="skill-level"><div class="skill-fill" style="width:45%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🔄</div>
+        <div class="skill-name">Agila metoder (Scrum)</div>
+        <div class="skill-level"><div class="skill-fill" style="width:75%"></div></div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚙️</div>
+        <div class="skill-name">Systemadministration</div>
+        <div class="skill-level"><div class="skill-fill" style="width:85%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ERFARENHET ── -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Erfarenhet</h2>
+    </div>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">2018 – 2023</div>
+        <div class="timeline-title">Kommunal verksamhet</div>
+        <div class="timeline-sub">Föreningsstöd & fritidsförvaltning</div>
+        <ul class="timeline-list">
+          <li>Systemansvar för FRI5</li>
+          <li>Schemaläggning och optimering av lokalbokning</li>
+          <li>Inpasseringssystem – hantering och programmering av accessbrickor</li>
+          <li>Kommunikationsansvar och samverkan med föreningar och aktörer</li>
+          <li>Initierade och drev projekt</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">2015 – 2018</div>
+        <div class="timeline-title">Ledarskap & tränarroll</div>
+        <div class="timeline-sub">Personlig tränare & teamledare</div>
+        <ul class="timeline-list">
+          <li>Ledde och utvecklade teamet</li>
+          <li>Delaktig vid rekrytering och verksamhetsutveckling</li>
+          <li>Planering, uppföljning och kundrelationer i högt tempo</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">2015 – 2016</div>
+        <div class="timeline-title">HealthImprovement PT</div>
+        <div class="timeline-sub">Medgrundare – Eget företag</div>
+        <ul class="timeline-list">
+          <li>Webb, marknadsföring och digital närvaro</li>
+          <li>Administration, bokföring (Fortnox) och fakturering</li>
+          <li>Helhetsansvar för verksamheten</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">Tidigare</div>
+        <div class="timeline-title">Övrig erfarenhet</div>
+        <div class="timeline-sub">Teknisk support, logistik & service</div>
+        <ul class="timeline-list">
+          <li>Fokus på problemlösning och kundkontakt</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── UTBILDNING ── -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Utbildning</h2>
+    </div>
+    <div class="edu-grid">
+      <div class="edu-card">
+        <div class="edu-period">2025 – 2027</div>
+        <div class="edu-school">IT-Högskolan</div>
+        <div class="edu-program">Javautveckling (YH)</div>
+        <div class="edu-tags">
+          <span class="tag">Java & OOP</span>
+          <span class="tag">Spring Boot</span>
+          <span class="tag">REST API</span>
+          <span class="tag">SQL</span>
+          <span class="tag">AWS</span>
+          <span class="tag">Scrum</span>
+          <span class="tag">LIA</span>
+        </div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-period">2013 – 2016</div>
+        <div class="edu-school">Umeå Universitet</div>
+        <div class="edu-program">Idrottsvetenskap – Sport Management</div>
+        <div class="edu-tags">
+          <span class="tag">Ledarskap</span>
+          <span class="tag">Organisation</span>
+          <span class="tag">Personlig träning</span>
+          <span class="tag">Ishockeycoach</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── LEDARSKAP ── -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Ledarskap & Engagemang</h2>
+    </div>
+    <div class="leadership-grid">
+      <div class="lead-card">
+        <div class="lead-icon">🏀</div>
+        <div>
+          <div class="lead-title">Djurgården Basket</div>
+          <div class="lead-desc">Styrelseledamot och kommunikationsansvarig (2022–2025). Drev föreningskommunikation och strategiskt arbete på styrelsenivå.</div>
+        </div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-icon">🏒</div>
+        <div>
+          <div class="lead-title">Ishockeytränare</div>
+          <div class="lead-desc">Erfarenhet som tränare och interim huvudtränare. Vana att leda grupper, planera träningar och hantera prestation under press.</div>
+        </div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-icon">⛸️</div>
+        <div>
+          <div class="lead-title">Ishockeyspelare (1998–2014)</div>
+          <div class="lead-desc">Aktiv spelare med erfarenhet från flera svenska klubbar, däribland Björklöven och Vallentuna, samt internationella erbjudanden från Kanada och USA.</div>
+        </div>
+      </div>
+      <div class="lead-card">
+        <div class="lead-icon">🚗</div>
+        <div>
+          <div class="lead-title">Körkort B</div>
+          <div class="lead-desc">Innehar giltigt körkort.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GITHUB ── -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>GitHub</h2>
+    </div>
+    <p style="color: var(--muted); max-width: 55ch;">
+      Kod, projekt och laborationer från utbildningen. Fler repos tillkommer löpande under LIA-perioden.
+    </p>
+    <div style="margin-top: 2rem;">
+      <a href="https://github.com/Birkegard" target="_blank" class="github-cta">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        github.com/Birkegard
+      </a>
+    </div>
+    <!-- Lägg till dina repo-kort här om du vill lyfta fram specifika projekt -->
+    <!--
+    <div class="github-grid">
+      <a href="#" class="repo-card">
+        <div class="repo-name">📁 projekt-namn</div>
+        <div class="repo-desc">Kort beskrivning av projektet.</div>
+      </a>
+    </div>
+    -->
+  </section>
+
+  <footer>
+    <p>Christoffer Birkegård · <span>birkegard.github.io</span> · 2025</p>
+    <p style="margin-top:0.5rem;">Svenska · Engelska · Körkort B · Stockholm</p>
+  </footer>
+
+</div>
+</body>
+</html>
